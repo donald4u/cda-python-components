@@ -10,7 +10,7 @@ Important notes on coding conventions in this repository:
      - Class names: I use CapWords.
      - Function names: I use camelCase. Again, I find this easier to read* vs the convention that uses underscores to separate words.
      - Variable names: These follow the same convention as function names, again, for readability*.
-     - * I recognize that the concept of 'readability' may be somewhat subjective.
+     - *I recognize that the concept of 'readability' may be somewhat subjective.
 - Tests:
   - The test path (tests) has two sub-directories - one for 'unit' tests, one for 'integration' tests. For the short term, th means that the path hierarchy differs slightly from the main source tree (under 'piot') due to the inclusion of 'unit' and 'integration' as parent paths for what is essentially a shared path convention as the main source tree. This allows the user to run all unit tests (and only unit tests) without bothering with setup and configuration for external components often necessary to run the integration tests.
 - Final notes:
@@ -119,6 +119,7 @@ If any code samples or other technology this work contains, describes, and / or 
 Please see [LICENSE](https://github.com/programming-the-iot/cda-python-components/blob/default/LICENSE) if you plan to use this code.
 
 Please refer to the referenced libraries for their respective licenses.
+
 
 
 
