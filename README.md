@@ -14,7 +14,7 @@ Important notes on coding conventions in this repository:
 - Tests:
   - The test path (tests) has two sub-directories - one for 'unit' tests, one for 'integration' tests. For the short term, th means that the path hierarchy differs slightly from the main source tree (under 'piot') due to the inclusion of 'unit' and 'integration' as parent paths for what is essentially a shared path convention as the main source tree. This allows the user to run all unit tests (and only unit tests) without bothering with setup and configuration for external components often necessary to run the integration tests.
 - Final notes:
-  - The code in this repository is largely comprised of shell classes that are designed to be implemented by the reader and are NOT solutions. These shell classes and their relationships respresent a notional design that aligns with the requirements listed in [Programming the IoT Requirements](https://github.com/orgs/programming-the-iot/projects/1). These requirements encapsulate the programming exercises presented in my book [Programming the Internet of Things: An Introduction to Building Integrated, Device to Cloud IoT Solutions](https://learning.oreilly.com/library/view/programming-the-internet/9781492081401).
+  - The code in this repository is largely comprised of shell classes that are designed to be implemented by the reader and are NOT solutions. These shell classes and their relationships respresent a notional design that aligns with the requirements listed in [Programming the IoT Requirements](https://github.com/orgs/programming-the-iot/projects/5). These requirements encapsulate the programming exercises presented in my book [Programming the Internet of Things: An Introduction to Building Integrated, Device to Cloud IoT Solutions](https://learning.oreilly.com/library/view/programming-the-internet/9781492081401).
 
 ## Links, Exercises, Updates, Errata, and Clarifications
 
@@ -119,6 +119,7 @@ If any code samples or other technology this work contains, describes, and / or 
 Please see [LICENSE](https://github.com/programming-the-iot/cda-python-components/blob/default/LICENSE) if you plan to use this code.
 
 Please refer to the referenced libraries for their respective licenses.
+
 
 
 
