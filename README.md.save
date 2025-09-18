@@ -1,0 +1,35 @@
+<<<<<<< HEAD
+<<<<<<< HEAD
+# Programming the IoT - Python Components
+This is the source repository for the Python components related to my Programming the Internet of Things book and Connected Devices IoT course. These are shell wrappers ONLY and are not a solution set (>
+=======
+# Programming the IoT - CDA Python Components
+This is the source repository for the Python components related to my Programming the Internet of Things book and Connected Devices IoT course. These are shell wrappers ONLY and are not a solution set (which is a separately repository, not yet released). For convenience to the reader, some basic functionality has already been implemented (such as configuration logic, consts, interfaces, and test cases).
+>>>>>>> Update README.md
+
+The code in this repository is largely comprised of shell classes that are designed to be implemented by the reader and are NOT solutions. These shell classes and their relationships respresent a notion>
+
+## Links, Exercises, Updates, Errata, and Clarifications
+
+Please see the following links to access exercises, errata / clarifications, and the e-book:
+ - [Programming the IoT Kanban Board](https://github.com/orgs/programming-the-iot/projects/1)
+ - [Errata and Clarifications](https://labbenchstudios.com/programming-the-iot-book/programming-the-iot-1st-edition/)
+ - [Programming the Internet of Things Book](https://learning.oreilly.com/library/view/programming-the-internet/9781492081401/)
+
+## How to use this repository
+If you're reading [Programming the Internet of Things: An Introduction to Building Integrated, Device to Cloud IoT Solutions](https://learning.oreilly.com/library/view/programming-the-internet/978149208>
+
+A solution set is available, although I haven't yet released it. Stay tuned for updates on this topic.
+
+## This repository aligns to exercises in Programming the Internet of Things
+These components are all written in Python3, and correlate to the exercises designed for the Constrained Device Application (CDA) specified in my book [Programming the Internet of Things: An Introductio>
+
+Since Python is also used for various cloud computing activities, there are other components that may be introduced as Cloud Service Functions (CSF) in the future, as they will share some of the common >
+## How to navigate the directory structure for this repository
+This repository is comprised of the following top level paths:
+<<<<<<< HEAD
+- [config](https://github.com/programming-the-iot/python-components/tree/default/config): Contains basic configuration file(s).
+- [src](https://github.com/programming-the-iot/python-components/tree/default/src): Contains the following source trees:
+  - [src/main/python](https://github.com/programming-the-iot/python-components/tree/default/src/main/python): The main source tree for python-components. Keep in mind that most of these classes are shel>
+  - [src/test/python](https://github.com/programming-the-iot/python-components/tree/default/src/test/python): The test source tree for python-components. These are designed to perform very basic unit an>
+- [simTestData](https://github.com/programming-the-iot/
