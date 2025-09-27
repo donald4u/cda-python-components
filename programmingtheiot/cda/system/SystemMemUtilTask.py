@@ -27,3 +27,17 @@ class SystemMemUtilTask(BaseSystemUtilTask):
 	def getTelemetryValue(self) -> float:
 		pass
 		
+		# SystemMemUtilTask.py
+import psutil
+from programmingtheiot.cda.system.BaseSystemUtilTask import BaseSystemUtilTask
+
+import logging
+
+class SystemMemUtilTask(BaseSystemUtilTask):
+    def __init__(self):
+        super().__init__()
+        logging.info("SystemMemUtilTask initialized.")
+
+    def getSystemData(self):
+        mem = psutil.virtual_memory()
+        return {"total_mem": mem.total, "used_mem": mem.used, "percent": mem.percent}

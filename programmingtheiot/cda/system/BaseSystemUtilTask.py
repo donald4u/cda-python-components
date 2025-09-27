@@ -29,4 +29,15 @@ class BaseSystemUtilTask():
 	
 	def getTelemetryValue(self) -> float:
 		pass
-	
+	 # BaseSystemUtilTask.py
+import logging
+
+class BaseSystemUtilTask:
+    def __init__(self):
+        logging.info("BaseSystemUtilTask initialized.")
+
+    def getSystemData(self):
+        """
+        Placeholder method to retrieve system metrics.
+        """
+        return {}
