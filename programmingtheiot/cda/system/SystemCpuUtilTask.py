@@ -1,29 +1,35 @@
-#####
-# 
-# This class is part of the Programming the Internet of Things
-# project, and is available via the MIT License, which can be
-# found in the LICENSE file at the top level of this repository.
-# 
-# You may find it more helpful to your design to adjust the
-# functionality, constants and interfaces (if there are any)
-# provided within in order to meet the needs of your specific
-# Programming the Internet of Things project.
-# 
+"""
+SystemCpuUtilTask module
+
+This class extends BaseSystemUtilTask and provides CPU utilization telemetry.
+"""
 
 import logging
 import psutil
 
+import programmingtheiot.common.ConfigConst as ConfigConst
 from programmingtheiot.cda.system.BaseSystemUtilTask import BaseSystemUtilTask
 
 class SystemCpuUtilTask(BaseSystemUtilTask):
-	"""
-	Shell representation of class for student implementation.
-	
-	"""
+    """
+    System CPU utilization task class.
+    """
 
-	def __init__(self):
-		pass
-	
-	def getTelemetryValue(self) -> float:
-		pass
-		
+    def __init__(self):
+        """
+        Constructor for SystemCpuUtilTask.
+        Initializes the task with the name and type defined in ConfigConst.
+        """
+        super(SystemCpuUtilTask, self).__init__(
+            name=ConfigConst.CPU_UTIL_NAME,
+            typeID=ConfigConst.CPU_UTIL_TYPE
+        )
+        logging.info(f"Initialized SystemCpuUtilTask with name: {self.name}, typeID: {self.typeID}")
+
+    def getTelemetryValue(self) -> float:
+        """
+        Returns the current CPU utilization percentage.
+        """
+        cpu_percent = psutil.cpu_percent()
+        logging.debug(f"CPU Utilization: {cpu_percent}%")
+        return cpu_percent

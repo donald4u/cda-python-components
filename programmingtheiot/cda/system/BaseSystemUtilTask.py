@@ -1,32 +1,42 @@
-#####
-# 
-# This class is part of the Programming the Internet of Things
-# project, and is available via the MIT License, which can be
-# found in the LICENSE file at the top level of this repository.
-# 
-# You may find it more helpful to your design to adjust the
-# functionality, constants and interfaces (if there are any)
-# provided within in order to meet the needs of your specific
-# Programming the Internet of Things project.
-# 
+"""
+BaseSystemUtilTask module
+
+This is the base class for all system utility tasks in the CDA project.
+"""
 
 import programmingtheiot.common.ConfigConst as ConfigConst
 
-class BaseSystemUtilTask():
-	"""
-	Shell implementation representation of class for student implementation.
-	
-	"""
-	
-	def __init__(self, name = ConfigConst.NOT_SET, typeID = ConfigConst.DEFAULT_SENSOR_TYPE):
-		pass
-	
-	def getName(self) -> str:
-		pass
-	
-	def getTypeID(self) -> int:
-		pass
-	
-	def getTelemetryValue(self) -> float:
-		pass
-	
+class BaseSystemUtilTask:
+    """
+    Base class for system utility tasks.
+    """
+
+    def __init__(self, name: str = ConfigConst.NOT_SET, typeID: int = ConfigConst.DEFAULT_SENSOR_TYPE):
+        """
+        Constructor for BaseSystemUtilTask.
+
+        :param name: Name of the task.
+        :param typeID: Type ID of the task.
+        """
+        self.name = name
+        self.typeID = typeID
+
+    def getName(self) -> str:
+        """
+        Getter for the task name.
+        """
+        return self.name
+
+    def getTypeID(self) -> int:
+        """
+        Getter for the task type ID.
+        """
+        return self.typeID
+
+    def getTelemetryValue(self) -> float:
+        """
+        Template method to get telemetry value.
+
+        Should be implemented by subclasses.
+        """
+        pass
