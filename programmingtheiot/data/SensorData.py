@@ -16,27 +16,36 @@ from programmingtheiot.data.BaseIotData import BaseIotData
 
 class SensorData(BaseIotData):
 	"""
-	Shell representation of class for student implementation.
-	
+	Representation of sensor data with support for float values.
 	"""
 		
 	def __init__(self, typeID: int = ConfigConst.DEFAULT_SENSOR_TYPE, name = ConfigConst.NOT_SET, d = None):
 		super(SensorData, self).__init__(name = name, typeID = typeID, d = d)
-		pass
-	
-	def getSensorType(self) -> int:
-		"""
-		Returns the sensor type to the caller.
 		
-		@return int
-		"""
-		return self.sensorType
+		self.value = ConfigConst.DEFAULT_VAL
 	
 	def getValue(self) -> float:
-		pass
+		"""
+		Returns the sensor value.
+		
+		@return float The current sensor value.
+		"""
+		return self.value
 	
 	def setValue(self, newVal: float):
-		pass
+		"""
+		Sets the sensor value and updates the timestamp.
+		
+		@param newVal The new sensor value.
+		"""
+		self.value = newVal
+		self.updateTimeStamp()
 		
 	def _handleUpdateData(self, data):
-		pass
+		"""
+		Updates the value from another SensorData instance.
+		
+		@param data The SensorData instance to copy from.
+		"""
+		if data and isinstance(data, SensorData):
+			self.value = data.getValue()

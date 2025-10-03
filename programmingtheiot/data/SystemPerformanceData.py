@@ -16,32 +16,55 @@ from programmingtheiot.data.BaseIotData import BaseIotData
 
 class SystemPerformanceData(BaseIotData):
 	"""
-	Shell representation of class for student implementation.
-	
+	Representation of system performance data including CPU and memory utilization.
 	"""
-	DEFAULT_VAL = 0.0
 	
 	def __init__(self, d = None):
 		super(SystemPerformanceData, self).__init__(name = ConfigConst.SYSTEM_PERF_MSG, typeID = ConfigConst.SYSTEM_PERF_TYPE, d = d)
-		pass
+		
+		self.cpuUtil = ConfigConst.DEFAULT_VAL
+		self.memUtil = ConfigConst.DEFAULT_VAL
 	
 	def getCpuUtilization(self):
-		pass
-	
-	def getDiskUtilization(self):
-		pass
+		"""
+		Returns the CPU utilization value.
+		
+		@return float The CPU utilization percentage.
+		"""
+		return self.cpuUtil
 	
 	def getMemoryUtilization(self):
-		pass
+		"""
+		Returns the memory utilization value.
+		
+		@return float The memory utilization percentage.
+		"""
+		return self.memUtil
 	
 	def setCpuUtilization(self, cpuUtil):
-		pass
-	
-	def setDiskUtilization(self, diskUtil):
-		pass
+		"""
+		Sets the CPU utilization value and updates the timestamp.
+		
+		@param cpuUtil The CPU utilization percentage.
+		"""
+		self.cpuUtil = cpuUtil
+		self.updateTimeStamp()
 	
 	def setMemoryUtilization(self, memUtil):
-		pass
+		"""
+		Sets the memory utilization value and updates the timestamp.
+		
+		@param memUtil The memory utilization percentage.
+		"""
+		self.memUtil = memUtil
+		self.updateTimeStamp()
 	
 	def _handleUpdateData(self, data):
-		pass
+		"""
+		Updates the values from another SystemPerformanceData instance.
+		
+		@param data The SystemPerformanceData instance to copy from.
+		"""
+		if data and isinstance(data, SystemPerformanceData):
+			self.cpuUtil = data.getCpuUtilization()
+			self.memUtil = data.getMemoryUtilization()
