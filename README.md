@@ -124,3 +124,169 @@ Please refer to the referenced libraries for their respective licenses.
 
 
 
+## Lab Module 03 - Data Simulation and Device Management
+
+### Overview
+
+Lab Module 03 implements a comprehensive data simulation and device management system for a Constrained Device Application (CDA). The implementation includes data container classes for sensor readings and actuator commands, simulator classes for generating telemetry data, manager classes for coordinating sensor/actuator operations and system performance monitoring, and a central DeviceDataManager that orchestrates all components while implementing local analytics for temperature-based HVAC control.
+
+### UML Class Diagram
+```mermaid
+classDiagram
+    %% Data Container Classes
+    class BaseIotData {
+        -name: str
+        -typeID: int
+        -timeStamp: str
+        -statusCode: int
+        -locationID: str
+        +updateTimeStamp()
+        +_handleUpdateData(data)
+    }
+    
+    class SensorData {
+        -value: float
+        +getValue()
+        +setValue(val)
+    }
+    
+    class ActuatorData {
+        -value: float
+        -command: int
+        -stateData: str
+        -isResponse: bool
+        +getCommand()
+        +getValue()
+        +setCommand(cmd)
+        +setValue(val)
+    }
+    
+    class SystemPerformanceData {
+        -cpuUtil: float
+        -memUtil: float
+        +getCpuUtilization()
+        +getMemoryUtilization()
+        +setCpuUtilization(val)
+        +setMemoryUtilization(val)
+    }
+    
+    %% Simulator Base Classes
+    class BaseSensorSimTask {
+        -name: str
+        -typeID: int
+        -dataSet: SensorDataSet
+        -useRandomizer: bool
+        +generateTelemetry()
+        +getTelemetryValue()
+    }
+    
+    class BaseActuatorSimTask {
+        -name: str
+        -typeID: int
+        -lastKnownCommand: int
+        -lastKnownValue: float
+        +updateActuator(data)
+        -_activateActuator(val, state)
+        -_deactivateActuator(val, state)
+    }
+    
+    %% Concrete Sensor Simulators
+    class HumiditySensorSimTask
+    class PressureSensorSimTask
+    class TemperatureSensorSimTask
+    
+    %% Concrete Actuator Simulators
+    class HumidifierActuatorSimTask
+    class HvacActuatorSimTask
+    
+    %% Manager Classes
+    class SensorAdapterManager {
+        -scheduler: BackgroundScheduler
+        -humidityAdapter: HumiditySensorSimTask
+        -pressureAdapter: PressureSensorSimTask
+        -tempAdapter: TemperatureSensorSimTask
+        -dataMsgListener: IDataMessageListener
+        +startManager()
+        +stopManager()
+        +handleTelemetry()
+    }
+    
+    class ActuatorAdapterManager {
+        -humidifierActuator: HumidifierActuatorSimTask
+        -hvacActuator: HvacActuatorSimTask
+        -dataMsgListener: IDataMessageListener
+        +sendActuatorCommand(data)
+    }
+    
+    class SystemPerformanceManager {
+        -scheduler: BackgroundScheduler
+        -cpuUtilTask: SystemCpuUtilTask
+        -memUtilTask: SystemMemUtilTask
+        -dataMsgListener: IDataMessageListener
+        +startManager()
+        +stopManager()
+        +handleTelemetry()
+    }
+    
+    class DeviceDataManager {
+        -sysPerfMgr: SystemPerformanceManager
+        -sensorAdapterMgr: SensorAdapterManager
+        -actuatorAdapterMgr: ActuatorAdapterManager
+        +startManager()
+        +stopManager()
+        +handleSensorMessage(data)
+        +handleActuatorCommandMessage(data)
+        +handleSystemPerformanceMessage(data)
+        -_handleSensorDataAnalysis(data)
+    }
+    
+    class ConstrainedDeviceApp {
+        -devDataMgr: DeviceDataManager
+        +startApp()
+        +stopApp(code)
+    }
+    
+    class IDataMessageListener {
+        <<interface>>
+        +handleSensorMessage(data)
+        +handleActuatorCommandMessage(data)
+        +handleActuatorCommandResponse(data)
+        +handleSystemPerformanceMessage(data)
+    }
+    
+    %% Inheritance Relationships
+    BaseIotData <|-- SensorData
+    BaseIotData <|-- ActuatorData
+    BaseIotData <|-- SystemPerformanceData
+    
+    BaseSensorSimTask <|-- HumiditySensorSimTask
+    BaseSensorSimTask <|-- PressureSensorSimTask
+    BaseSensorSimTask <|-- TemperatureSensorSimTask
+    
+    BaseActuatorSimTask <|-- HumidifierActuatorSimTask
+    BaseActuatorSimTask <|-- HvacActuatorSimTask
+    
+    IDataMessageListener <|.. DeviceDataManager
+    
+    %% Composition Relationships
+    DeviceDataManager *-- SystemPerformanceManager
+    DeviceDataManager *-- SensorAdapterManager
+    DeviceDataManager *-- ActuatorAdapterManager
+    
+    SensorAdapterManager *-- HumiditySensorSimTask
+    SensorAdapterManager *-- PressureSensorSimTask
+    SensorAdapterManager *-- TemperatureSensorSimTask
+    
+    ActuatorAdapterManager *-- HumidifierActuatorSimTask
+    ActuatorAdapterManager *-- HvacActuatorSimTask
+    
+    ConstrainedDeviceApp *-- DeviceDataManager
+    
+    %% Association Relationships
+    BaseSensorSimTask ..> SensorData : creates
+    BaseActuatorSimTask ..> ActuatorData : processes
+    SystemPerformanceManager ..> SystemPerformanceData : creates
+    
+    SensorAdapterManager ..> IDataMessageListener : notifies
+    ActuatorAdapterManager ..> IDataMessageListener : notifies
+    SystemPerformanceManager ..> IDataMessageListener : notifies
