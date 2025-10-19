@@ -4,19 +4,18 @@ import programmingtheiot.common.ConfigConst as ConfigConst
 from programmingtheiot.common.ConfigUtil import ConfigUtil
 from programmingtheiot.cda.system.SystemCpuUtilTask import SystemCpuUtilTask
 from programmingtheiot.cda.system.SystemMemUtilTask import SystemMemUtilTask
+from programmingtheiot.data.SystemPerformanceData import SystemPerformanceData
 
 class SystemPerformanceManager:
     def __init__(self):
         configUtil = ConfigUtil()
         
-        # Polling rate for telemetry collection
         self.pollRate = configUtil.getInteger(
             section=ConfigConst.CONSTRAINED_DEVICE,
             key=ConfigConst.POLL_CYCLES_KEY,
             defaultVal=ConfigConst.DEFAULT_POLL_CYCLES
         )
         
-        # Device location ID
         self.locationID = configUtil.getProperty(
             section=ConfigConst.CONSTRAINED_DEVICE,
             key=ConfigConst.DEVICE_LOCATION_ID_KEY,
@@ -26,22 +25,16 @@ class SystemPerformanceManager:
         if self.pollRate <= 0:
             self.pollRate = ConfigConst.DEFAULT_POLL_CYCLES
         
-        # Placeholder for data message listener
         self.dataMsgListener = None
-        
-        # APScheduler setup
         self.scheduler = BackgroundScheduler()
         self.scheduler.add_job(self.handleTelemetry, 'interval', seconds=self.pollRate)
         
-        # CPU and memory utilization tasks
         self.cpuUtilTask = SystemCpuUtilTask()
         self.memUtilTask = SystemMemUtilTask()
 
-    # Setter for data message listener
     def setDataMessageListener(self, listener):
         self.dataMsgListener = listener
 
-    # Telemetry handling method
     def handleTelemetry(self):
         cpuUtilPct = self.cpuUtilTask.getTelemetryValue()
         memUtilPct = self.memUtilTask.getTelemetryValue()
@@ -50,8 +43,15 @@ class SystemPerformanceManager:
             'CPU utilization is %s percent, and memory utilization is %s percent.',
             str(cpuUtilPct), str(memUtilPct)
         )
+        
+        sysPerfData = SystemPerformanceData()
+        sysPerfData.setLocationID(self.locationID)
+        sysPerfData.setCpuUtilization(cpuUtilPct)
+        sysPerfData.setMemoryUtilization(memUtilPct)
+        
+        if self.dataMsgListener:
+            self.dataMsgListener.handleSystemPerformanceMessage(data=sysPerfData)
 
-    # Start the performance manager
     def startManager(self):
         logging.info("Starting SystemPerformanceManager...")
         
@@ -61,7 +61,6 @@ class SystemPerformanceManager:
         else:
             logging.warning("SystemPerformanceManager scheduler already started. Ignoring.")
 
-    # Stop the performance manager
     def stopManager(self):
         logging.info("Stopping SystemPerformanceManager...")
         
