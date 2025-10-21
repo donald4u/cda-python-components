@@ -26,6 +26,8 @@ from programmingtheiot.cda.system.ActuatorAdapterManager import ActuatorAdapterM
 from programmingtheiot.cda.system.SensorAdapterManager import SensorAdapterManager
 from programmingtheiot.cda.system.SystemPerformanceManager import SystemPerformanceManager
 
+from programmingtheiot.cda.connection.MqttClientConnector import MqttClientConnector
+
 class DeviceDataManager(IDataMessageListener):
 	"""
 	Central data manager for the Constrained Device Application.
@@ -48,6 +50,11 @@ class DeviceDataManager(IDataMessageListener):
 		# NOTE: this can also be retrieved from the configuration file
 		self.enableActuation = True
 		
+		self.enableMqttClient = \
+			self.configUtil.getBoolean(
+				section = ConfigConst.CONSTRAINED_DEVICE,
+				key = ConfigConst.ENABLE_MQTT_CLIENT_KEY)
+		
 		self.sysPerfMgr = None
 		self.sensorAdapterMgr = None
 		self.actuatorAdapterMgr = None
@@ -57,8 +64,15 @@ class DeviceDataManager(IDataMessageListener):
 		self.sensorDataCache = {}
 		self.systemPerformanceDataCache = {}
 		
-		# NOTE: The following aren't used until Part III
+		# MQTT client initialization
 		self.mqttClient = None
+		
+		if self.enableMqttClient:
+			self.mqttClient = MqttClientConnector()
+			self.mqttClient.setDataMessageListener(self)
+			logging.info("MQTT client enabled")
+		
+		# NOTE: The following aren't used until Part III
 		self.coapClient = None
 		
 		if self.enableSystemPerf:
@@ -202,6 +216,10 @@ class DeviceDataManager(IDataMessageListener):
 		
 		if self.sensorAdapterMgr:
 			self.sensorAdapterMgr.startManager()
+		
+		if self.mqttClient:
+			self.mqttClient.connectClient()
+			self.mqttClient.subscribeToTopic(ResourceNameEnum.CDA_ACTUATOR_CMD_RESOURCE, callback = None, qos = ConfigConst.DEFAULT_QOS)
 			
 		logging.info("Started DeviceDataManager.")
 		
@@ -216,6 +234,10 @@ class DeviceDataManager(IDataMessageListener):
 		
 		if self.sensorAdapterMgr:	
 			self.sensorAdapterMgr.stopManager()
+		
+		if self.mqttClient:
+			self.mqttClient.unsubscribeFromTopic(ResourceNameEnum.CDA_ACTUATOR_CMD_RESOURCE)
+			self.mqttClient.disconnectClient()
 			
 		logging.info("Stopped DeviceDataManager.")
 		

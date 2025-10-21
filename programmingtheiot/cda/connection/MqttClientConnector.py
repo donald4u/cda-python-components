@@ -4,11 +4,6 @@
 # project, and is available via the MIT License, which can be
 # found in the LICENSE file at the top level of this repository.
 # 
-# You may find it more helpful to your design to adjust the
-# functionality, constants and interfaces (if there are any)
-# provided within in order to meet the needs of your specific
-# Programming the Internet of Things project.
-# 
 
 import logging
 import paho.mqtt.client as mqttClient
@@ -22,69 +17,163 @@ from programmingtheiot.common.ResourceNameEnum import ResourceNameEnum
 from programmingtheiot.cda.connection.IPubSubClient import IPubSubClient
 
 class MqttClientConnector(IPubSubClient):
-	"""
-	Shell representation of class for student implementation.
-	
-	"""
+    """
+    MQTT client connector using paho-mqtt library.
+    """
 
-	def __init__(self, clientID: str = None):
-		"""
-		Default constructor. This will set remote broker information and client connection
-		information based on the default configuration file contents.
-		
-		@param clientID Defaults to None. Can be set by caller. If this is used, it's
-		critically important that a unique, non-conflicting name be used so to avoid
-		causing the MQTT broker to disconnect any client using the same name. With
-		auto-reconnect enabled, this can cause a race condition where each client with
-		the same clientID continuously attempts to re-connect, causing the broker to
-		disconnect the previous instance.
-		"""
-		pass
+    def __init__(self, clientID: str = None):
+        self.config = ConfigUtil()
+        self.dataMsgListener = None
+        
+        self.host = self.config.getProperty(
+            ConfigConst.MQTT_GATEWAY_SERVICE, ConfigConst.HOST_KEY, ConfigConst.DEFAULT_HOST)
+        
+        self.port = self.config.getInteger(
+            ConfigConst.MQTT_GATEWAY_SERVICE, ConfigConst.PORT_KEY, ConfigConst.DEFAULT_MQTT_PORT)
+        
+        self.keepAlive = self.config.getInteger(
+            ConfigConst.MQTT_GATEWAY_SERVICE, ConfigConst.KEEP_ALIVE_KEY, ConfigConst.DEFAULT_KEEP_ALIVE)
+        
+        self.defaultQos = self.config.getInteger(
+            ConfigConst.MQTT_GATEWAY_SERVICE, ConfigConst.DEFAULT_QOS_KEY, ConfigConst.DEFAULT_QOS)
+        
+        if not clientID:
+            clientID = self.config.getProperty(
+                ConfigConst.CONSTRAINED_DEVICE, ConfigConst.DEVICE_LOCATION_ID_KEY, "CDAMqttClient")
+        
+        self.mc = mqttClient.Client(client_id=clientID, clean_session=True)
+        self.mc.on_connect = self.onConnect
+        self.mc.on_disconnect = self.onDisconnect
+        self.mc.on_message = self.onMessage
+        self.mc.on_publish = self.onPublish
+        self.mc.on_subscribe = self.onSubscribe
+        
+        logging.info(f"MQTT client created. Broker: {self.host}:{self.port}")
 
-	def connectClient(self) -> bool:
-		pass
-		
-	def disconnectClient(self) -> bool:
-		pass
-		
-	def onConnect(self, client, userdata, flags, rc):
-		pass
-		
-	def onDisconnect(self, client, userdata, rc):
-		pass
-		
-	def onMessage(self, client, userdata, msg):
-		pass
-			
-	def onPublish(self, client, userdata, mid):
-		pass
-	
-	def onSubscribe(self, client, userdata, mid, granted_qos):
-		pass
-	
-	def onActuatorCommandMessage(self, client, userdata, msg):
-		"""
-		This callback is defined as a convenience, but does not
-		need to be used and can be ignored.
-		
-		It's simply an example for how you can create your own
-		custom callback for incoming messages from a specific
-		topic subscription (such as for actuator commands).
-		
-		@param client The client reference context.
-		@param userdata The user reference context.
-		@param msg The message context, including the embedded payload.
-		"""
-		pass
-	
-	def publishMessage(self, resource: ResourceNameEnum = None, msg: str = None, qos: int = ConfigConst.DEFAULT_QOS):
-		pass
-	
-	def subscribeToTopic(self, resource: ResourceNameEnum = None, callback = None, qos: int = ConfigConst.DEFAULT_QOS):
-		pass
-	
-	def unsubscribeFromTopic(self, resource: ResourceNameEnum = None):
-		pass
+    def connectClient(self) -> bool:
+        if not self.mc:
+            logging.warning("MQTT client not initialized.")
+            return False
+        
+        try:
+            logging.info(f"Connecting to MQTT broker at {self.host}:{self.port}...")
+            self.mc.connect(self.host, self.port, self.keepAlive)
+            self.mc.loop_start()
+            return True
+        except Exception as e:
+            logging.error(f"Failed to connect to MQTT broker: {e}")
+            return False
+        
+    def disconnectClient(self) -> bool:
+        if not self.mc:
+            logging.warning("MQTT client not initialized.")
+            return False
+        
+        try:
+            self.mc.loop_stop()
+            self.mc.disconnect()
+            logging.info("Disconnected from MQTT broker.")
+            return True
+        except Exception as e:
+            logging.error(f"Failed to disconnect from MQTT broker: {e}")
+            return False
+        
+    def onConnect(self, client, userdata, flags, rc):
+        logging.info(f"Connected to MQTT broker. Result code: {rc}")
+        
+    def onDisconnect(self, client, userdata, rc):
+        logging.info(f"Disconnected from MQTT broker. Result code: {rc}")
+        
+    def onMessage(self, client, userdata, msg):
+        logging.info(f"Message received on topic {msg.topic}: {msg.payload.decode('utf-8')}")
+        
+        if self.dataMsgListener:
+            # TODO: Parse message and call appropriate listener method
+            pass
+            
+    def onPublish(self, client, userdata, mid):
+        logging.debug(f"Message published. Message ID: {mid}")
+    
+    def onSubscribe(self, client, userdata, mid, granted_qos):
+        logging.info(f"Subscribed to topic. Message ID: {mid}, QoS: {granted_qos}")
+    
+    def publishMessage(self, resource: ResourceNameEnum = None, msg: str = None, qos: int = ConfigConst.DEFAULT_QOS) -> bool:
+        """
+        Publish a message to the specified topic with optional QoS level.
+        
+        @param resource: The topic resource to publish to
+        @param msg: The message payload to publish
+        @param qos: QoS level (0, 1, or 2). If invalid, defaults to ConfigConst.DEFAULT_QOS
+        @return: True if publish was successful, False otherwise
+        """
+        # check validity of resource (topic)
+        if not resource:
+            logging.warning('No topic specified. Cannot publish message.')
+            return False
+        
+        # check validity of message
+        if not msg:
+            logging.warning('No message specified. Cannot publish message to topic: ' + resource.value)
+            return False
+        
+        # check validity of QoS - set to default if necessary
+        if qos < 0 or qos > 2:
+            qos = ConfigConst.DEFAULT_QOS
+        
+        # publish message, and wait for publish to complete before returning
+        logging.info(f'Publishing message to topic {resource.value} with QoS {qos}')
+        msgInfo = self.mc.publish(topic=resource.value, payload=msg, qos=qos)
+        msgInfo.wait_for_publish()
+        
+        return True
+    
+    def subscribeToTopic(self, resource: ResourceNameEnum = None, callback = None, qos: int = ConfigConst.DEFAULT_QOS) -> bool:
+        """
+        Subscribe to the specified topic with optional callback and QoS level.
+        
+        @param resource: The topic resource to subscribe to
+        @param callback: Optional custom callback for messages on this topic
+        @param qos: QoS level (0, 1, or 2). If invalid, defaults to ConfigConst.DEFAULT_QOS
+        @return: True if subscription was successful, False otherwise
+        """
+        # check validity of resource (topic)
+        if not resource:
+            logging.warning('No topic specified. Cannot subscribe.')
+            return False
+        
+        # check validity of QoS - set to default if necessary
+        if qos < 0 or qos > 2:
+            qos = ConfigConst.DEFAULT_QOS
+        
+        # subscribe to topic
+        logging.info(f'Subscribing to topic {resource.value} with QoS {qos}')
+        self.mc.subscribe(resource.value, qos)
+        
+        # add custom callback if provided
+        if callback:
+            self.mc.message_callback_add(resource.value, callback)
+        
+        return True
+    
+    def unsubscribeFromTopic(self, resource: ResourceNameEnum = None) -> bool:
+        """
+        Unsubscribe from the specified topic.
+        
+        @param resource: The topic resource to unsubscribe from
+        @return: True if unsubscribe was successful, False otherwise
+        """
+        # check validity of resource (topic)
+        if not resource:
+            logging.warning('No topic specified. Cannot unsubscribe.')
+            return False
+        
+        logging.info(f'Unsubscribing from topic {resource.value}')
+        self.mc.unsubscribe(resource.value)
+        
+        return True
 
-	def setDataMessageListener(self, listener: IDataMessageListener = None) -> bool:
-		pass
+    def setDataMessageListener(self, listener: IDataMessageListener = None) -> bool:
+        if listener:
+            self.dataMsgListener = listener
+            return True
+        return False
